@@ -1,24 +1,38 @@
-import React from 'react'
-import Link from './Link'
+import React from "react";
+import Link from "./Link";
+import { gql, useQuery } from "@apollo/client";
 
-const LinkList = () => {
-    const linksToRender = [
-      {
-        id: "link-id-1",
-        description: "Prisma gives you a powerful database toolkit",
-        url: "https://prisma.io",
-      },
-      {
-        id: "link-id-2",
-        description: "The best GraphQL client",
-        url: "https://www.apollographql.com/docs/react/",
+
+//The FEED_QUERY variable uses gql, a library that uses tagged template literals to parse the GraphQL query document we define.
+//This query document is then passed into the useQuery hook in the LinkList component. 
+const FEED_QUERY = gql`
+  {
+    feed {
+      id
+      links {
+        id
+        createdAt
+        url
+        description
       }
-    ];
+    }
+  }
+`;
+//When the LinkList component initially renders, there won’t be any information on the data variable. For this reason, we need to check that data is truthy before trying to render any of the links that will come out of it. 
+//Once our GraphQL request resolves with some data, the LinkList component will re - render and data will be truthy.Our links are available on data.feed.links which we can map over to render.
+const LinkList = () => {
+  const {data} = useQuery(FEED_QUERY)
   return (
-      <div>{linksToRender.map((link) => (
-          <Link key={link.id} link={link} />
-      ))}</div>
-  )
-}
+      <div>
+          {data && (
+              <>
+                  {data.feed.links.map((link) => (
+                    <Link key={link.id} link={link} />
+                ))}
+              </>
+          )}
+    </div>
+  );
+};
 
-export default LinkList
+export default LinkList;
